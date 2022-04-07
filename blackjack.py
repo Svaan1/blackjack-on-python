@@ -69,34 +69,21 @@ class BlackJack():
         self.restart_cards()
 
         self.define_wager()
-        clear()
         
         self.initial_draw()
-        self.print_player_table()
 
-        while True:
-            if self.players_decision() == False:
-                break
-        
-        self.print_table()
-        sleep(3)
+        self.players_decision()
 
-        while True:
-            if self.dealers_decision() == False: break
-            self.print_table()
-            sleep(3)
+        self.dealers_decision()
         
-        clear()
-        self.print_table()
-        print("\nDealer:",self.hand_value(self.dealers_hand))
-        print("Player:",self.hand_value(self.players_hand))
-        print("\nThe player", self.check_win() + "!")
+        self.print_result()
 
     def players_decision(self):
+        self.print_player_table()
         players_value = self.hand_value(self.players_hand)
         if players_value >= 21:
             clear()
-            return False
+            return
 
         operator = int(input('''
         [1] Hit
@@ -106,48 +93,35 @@ class BlackJack():
 
         if operator == 1:
             self.hit_player()
-            clear()
-            self.print_player_table()
-            return True
+            self.players_decision()
         elif operator == 2:
             self.double_down()
-            clear()
-            return False
         elif operator == 3:
-            clear()
-            return False
+            return
         else:
             print("Digite uma opção válida.")
-            return True
+            self.players_decision()
     def dealers_decision(self):
         players_value = self.hand_value(self.players_hand)
         dealers_value = self.hand_value(self.dealers_hand)
-        if dealers_value > 21:
-            print("\nDealer Busts!")
-            sleep(3)
-            clear()
-            return False
+        self.print_table()
+        sleep(3)
         if players_value > 21:
-            print("\nPlayer Busts!")
-            sleep(3)
-            clear()
-            return False
+            self.print_dealer_text("Player Busts!")
+            return
+        if dealers_value > 21:
+            self.print_dealer_text("Dealer Busts!")
+            return
         if dealers_value == 21:
-            print("\nDealer's Blackjack!\n")
-            sleep(3)
-            clear()
-            return False
+            self.print_dealer_text("Dealer's Blackjack!")
+            return
         if dealers_value > players_value and dealers_value <= 21 or dealers_value >= 17:
-            print("\nDealer Stands!\n")
-            sleep(3)
-            clear()    
-            return False   
+            self.print_dealer_text("Dealer Stands!")
+            return
         if dealers_value <= 16:
+            self.print_dealer_text("Dealer Hits!")
             self.hit_dealer()
-            print("\nDealer Hits!")
-            sleep(3)
-            clear()
-            return True
+            self.dealers_decision()
 
     def check_win(self):
         players_value = self.hand_value(self.players_hand)
@@ -175,7 +149,6 @@ class BlackJack():
         
         if players_value < dealers_value:
             return "lost"
-        self.money += self.wager * 2
     def restart_cards(self):
         self.dealers_hand = []
         self.players_hand = []
@@ -183,8 +156,8 @@ class BlackJack():
     def hand_value(self, hand):
         value = 0
 
-        for index in range(0, len(hand)):
-            card = hand[index][0]
+        for card_and_suit in hand:
+            card = card_and_suit[0]
 
             if card in "JQK":
                 value += 10
@@ -201,18 +174,28 @@ class BlackJack():
                 value += int(card)
         
         return value
-    
+
+    def print_result(self):
+        self.print_table()
+        print("\nDealer:",self.hand_value(self.dealers_hand))
+        print("Player:",self.hand_value(self.players_hand))
+        print("\nThe player", self.check_win() + "!")
     def print_player_table(self):
+        clear()
         skipline()
         self.print_dealers_hand(value=False)
         self.print_players_hand()
         skipline()
     def print_table(self, value= True):
+        clear()
         skipline()
         self.print_dealers_hand()
         self.print_players_hand()
         skipline()
 
+    def print_dealer_text(self,text):
+        print("\n"+text)
+        sleep(3)
     def print_players_hand(self):
         print("Your hand:    ", end=' ')
         for card in self.players_hand:
@@ -247,6 +230,7 @@ class BlackJack():
 
         self.wager = wager_value
         self.money -= wager_value
+        clear()
         return True
     def initial_draw(self):
         for i in range(0,2):
